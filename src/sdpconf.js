@@ -1,4 +1,16 @@
-const sdp = '\
+const utils = require('../utils');
+
+function randmoNum() {
+  let num = utils.randomNumber();
+  num = num % 1000000;
+  return num;
+}
+
+let ssrc1 = randmoNum();
+let ssrc2 = randmoNum();
+let ssrc3 = randmoNum();
+
+const sdp = `\
 v=0\r\n\
 o=- 8651593276701611643 2 IN IP4 127.0.0.1\r\n\
 s=-\r\n\
@@ -34,10 +46,10 @@ a=rtpmap:110 telephone-event/4800\r\n\
 a=rtpmap:112 telephone-event/32000\r\n\
 a=rtpmap:113 telephone-event/16000\r\n\
 a=rtpmap:126 telephone-event/8000\r\n\
-a=ssrc:3752582766 cname:pEjDhSaMVBG5QwrO\r\n\
-a=ssrc:3752582766 msid: 44784880-a57d-4134-9fc1-03be18835f83\r\n\
-a=ssrc:3752582766 mslabel:\r\n\
-a=ssrc:3752582766 label:44784880-a57d-4134-9fc1-03be18835f83\r\n\
+a=ssrc:${ssrc1} cname:pEjDhSaMVBG5QwrO\r\n\
+a=ssrc:${ssrc1} msid: 44784880-a57d-4134-9fc1-03be18835f83\r\n\
+a=ssrc:${ssrc1} mslabel:\r\n\
+a=ssrc:${ssrc1} label:44784880-a57d-4134-9fc1-03be18835f83\r\n\
 m=video 9 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 102 123 127 122 125 107 108 109 124\r\n\
 c=IN IP4 0.0.0.0\r\n\
 a=rtcp:9 IN IP4 0.0.0.0\r\n\
@@ -116,16 +128,16 @@ a=rtpmap:108 red/90000\r\n\
 a=rtpmap:109 rtx/90000\r\n\
 a=fmtp:109 apt=108\r\n\
 a=rtpmap:124 ulpfec/90000\r\n\
-a=ssrc-group:FID 3745581824 389179028\r\n\
-a=ssrc:3745581824 cname:pEjDhSaMVBG5QwrO\r\n\
-a=ssrc:3745581824 msid: 083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
-a=ssrc:3745581824 mslabel:\r\n\
-a=ssrc:3745581824 label:083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
-a=ssrc:389179028 cname:pEjDhSaMVBG5QwrO\r\n\
-a=ssrc:389179028 msid: 083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
-a=ssrc:389179028 mslabel:\r\n\
-a=ssrc:389179028 label:083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
-';
+a=ssrc-group:FID ${ssrc2} ${ssrc3}\r\n\
+a=ssrc:${ssrc2} cname:pEjDhSaMVBG5QwrO\r\n\
+a=ssrc:${ssrc2} msid: 083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
+a=ssrc:${ssrc2} mslabel:\r\n\
+a=ssrc:${ssrc2} label:083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
+a=ssrc:${ssrc3} cname:pEjDhSaMVBG5QwrO\r\n\
+a=ssrc:${ssrc3} msid: 083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
+a=ssrc:${ssrc3} mslabel:\r\n\
+a=ssrc:${ssrc3} label:083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
+`;
 
 const sdp_rtp = '\r\n\
 v=0\r\n\
@@ -256,7 +268,7 @@ a=ssrc:389179028 mslabel:\r\n\
 a=ssrc:389179028 label:083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
 ';
 
-rtpAudioParameters = '\
+rtpAudioParameters = `\
 {\
     "muxId": "0",\
     "codecs": [\
@@ -284,7 +296,7 @@ rtpAudioParameters = '\
     ],\
     "encodings": [\
       {\
-        "ssrc": 566666\
+        "ssrc": ${randmoNum()}\
       }\
     ],\
     "rtcp": {\
@@ -293,9 +305,9 @@ rtpAudioParameters = '\
       "mux": true\
     }\
   }\
-';
+`;
 
-const rtpVideoParameters = '\
+const rtpVideoParameters = `\
 {\
   "muxId": "1",\
   "codecs": [\
@@ -354,23 +366,23 @@ const rtpVideoParameters = '\
   ],\
   "encodings": [\
     {\
-      "ssrc": 818006808,\
+      "ssrc": ${ssrc1},\
       "rtx": {\
-        "ssrc": 298113582\
+        "ssrc": ${ssrc2}\
       },\
       "profile": "low"\
     },\
     {\
-      "ssrc": 818006809,\
+      "ssrc": ${ssrc1 + 1},\
       "rtx": {\
-        "ssrc": 298113583\
+        "ssrc": ${ssrc2 + 1}\
       },\
       "profile": "medium"\
     },\
     {\
-      "ssrc": 818006810,\
+      "ssrc": ${ssrc1 + 2},\
       "rtx": {\
-        "ssrc": 298113584\
+        "ssrc": ${ssrc2 + 2}\
       },\
       "profile": "high"\
     }\
@@ -381,11 +393,17 @@ const rtpVideoParameters = '\
     "mux": true\
   }\
 }\
-';
+`;
+
+sdp_offer = {
+  type: 'offer',
+  sdp: sdp
+};
 
 module.exports = sdpconf = {
     sdp,
     sdp_rtp,
+    sdp_offer,
     rtpAudioParameters, // need custom ssrc, cname, but the cname must the same with rtpVideoParameters.
     rtpVideoParameters  // need custom ssrc, cname, but the cname must the same with rtpVideoParameters.
 }
