@@ -1,16 +1,33 @@
+"use strict";
+
 const utils = require('../utils');
 
-function randmoNum() {
-  let num = utils.randomNumber();
-  num = num % 1000000;
-  return num;
-}
+class sdpconf {
+  constructor() {
+    this.video_ssrc;
+    this.video_ssrc_rtx1;
+    this.video_ssrc_rtx2;
+    this.audio_ssrc;
+  }
 
-let ssrc1 = randmoNum();
-let ssrc2 = randmoNum();
-let ssrc3 = randmoNum();
+  randomNum() {
+    let num = utils.randomNumber();
+    num = num % 1000000;
+    return num;
+  }
 
-const sdp = `\
+  genAudioSsrc() {
+    this.audio_ssrc = this.randomNum();
+  }
+
+  genVideoSsrc() {
+    this.video_ssrc = this.randomNum();
+    this.video_ssrc_rtx1 = this.randomNum();
+    this.video_ssrc_rtx2 = this.randomNum();
+  }
+
+  get _sdp() {
+    let sdp = `\
 v=0\r\n\
 o=- 8651593276701611643 2 IN IP4 127.0.0.1\r\n\
 s=-\r\n\
@@ -46,10 +63,10 @@ a=rtpmap:110 telephone-event/4800\r\n\
 a=rtpmap:112 telephone-event/32000\r\n\
 a=rtpmap:113 telephone-event/16000\r\n\
 a=rtpmap:126 telephone-event/8000\r\n\
-a=ssrc:${ssrc1} cname:pEjDhSaMVBG5QwrO\r\n\
-a=ssrc:${ssrc1} msid: 44784880-a57d-4134-9fc1-03be18835f83\r\n\
-a=ssrc:${ssrc1} mslabel:\r\n\
-a=ssrc:${ssrc1} label:44784880-a57d-4134-9fc1-03be18835f83\r\n\
+a=ssrc:${this.video_ssrc} cname:pEjDhSaMVBG5QwrO\r\n\
+a=ssrc:${this.video_ssrc} msid: 44784880-a57d-4134-9fc1-03be18835f83\r\n\
+a=ssrc:${this.video_ssrc} mslabel:\r\n\
+a=ssrc:${this.video_ssrc} label:44784880-a57d-4134-9fc1-03be18835f83\r\n\
 m=video 9 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 102 123 127 122 125 107 108 109 124\r\n\
 c=IN IP4 0.0.0.0\r\n\
 a=rtcp:9 IN IP4 0.0.0.0\r\n\
@@ -128,18 +145,22 @@ a=rtpmap:108 red/90000\r\n\
 a=rtpmap:109 rtx/90000\r\n\
 a=fmtp:109 apt=108\r\n\
 a=rtpmap:124 ulpfec/90000\r\n\
-a=ssrc-group:FID ${ssrc2} ${ssrc3}\r\n\
-a=ssrc:${ssrc2} cname:pEjDhSaMVBG5QwrO\r\n\
-a=ssrc:${ssrc2} msid: 083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
-a=ssrc:${ssrc2} mslabel:\r\n\
-a=ssrc:${ssrc2} label:083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
-a=ssrc:${ssrc3} cname:pEjDhSaMVBG5QwrO\r\n\
-a=ssrc:${ssrc3} msid: 083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
-a=ssrc:${ssrc3} mslabel:\r\n\
-a=ssrc:${ssrc3} label:083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
+a=ssrc-group:FID ${this.video_ssrc_rtx1} ${this.video_ssrc_rtx2}\r\n\
+a=ssrc:${this.video_ssrc_rtx1} cname:pEjDhSaMVBG5QwrO\r\n\
+a=ssrc:${this.video_ssrc_rtx1} msid: 083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
+a=ssrc:${this.video_ssrc_rtx1} mslabel:\r\n\
+a=ssrc:${this.video_ssrc_rtx1} label:083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
+a=ssrc:${this.video_ssrc_rtx2} cname:pEjDhSaMVBG5QwrO\r\n\
+a=ssrc:${this.video_ssrc_rtx2} msid: 083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
+a=ssrc:${this.video_ssrc_rtx2} mslabel:\r\n\
+a=ssrc:${this.video_ssrc_rtx2} label:083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
 `;
+    return sdp;
+  }
 
-const sdp_rtp = '\r\n\
+  get _sdp_rtp() {
+    let rtp =
+      '\r\n\
 v=0\r\n\
 o=- 8651593276701611655 2 IN IP4 127.0.0.1\r\n\
 s=-\r\n\
@@ -268,7 +289,12 @@ a=ssrc:389179028 mslabel:\r\n\
 a=ssrc:389179028 label:083539cf-413e-4a6b-b03f-9ce29796bb2a\r\n\
 ';
 
-rtpAudioParameters = `\
+    return rtp;
+  }
+
+  get _rtpAudioParameters() {
+    let rtp =
+      `\
 {\
     "muxId": "0",\
     "codecs": [\
@@ -296,7 +322,7 @@ rtpAudioParameters = `\
     ],\
     "encodings": [\
       {\
-        "ssrc": ${randmoNum()}\
+        "ssrc": ${this.audio_ssrc}\
       }\
     ],\
     "rtcp": {\
@@ -306,8 +332,12 @@ rtpAudioParameters = `\
     }\
   }\
 `;
+    return rtp;
+  }
 
-const rtpVideoParameters = `\
+  get _rtpVideoParameters() {
+    let rtp =
+      `\
 {\
   "muxId": "1",\
   "codecs": [\
@@ -366,23 +396,23 @@ const rtpVideoParameters = `\
   ],\
   "encodings": [\
     {\
-      "ssrc": ${ssrc1},\
+      "ssrc": ${this.video_ssrc},\
       "rtx": {\
-        "ssrc": ${ssrc2}\
+        "ssrc": ${this.video_ssrc_rtx1}\
       },\
       "profile": "low"\
     },\
     {\
-      "ssrc": ${ssrc1 + 1},\
+      "ssrc": ${this.video_ssrc + 1},\
       "rtx": {\
-        "ssrc": ${ssrc2 + 1}\
+        "ssrc": ${this.video_ssrc_rtx1 + 1}\
       },\
       "profile": "medium"\
     },\
     {\
-      "ssrc": ${ssrc1 + 2},\
+      "ssrc": ${this.video_ssrc + 2},\
       "rtx": {\
-        "ssrc": ${ssrc2 + 2}\
+        "ssrc": ${this.video_ssrc_rtx1 + 2}\
       },\
       "profile": "high"\
     }\
@@ -394,16 +424,38 @@ const rtpVideoParameters = `\
   }\
 }\
 `;
+    return rtp;
+  }
 
-sdp_offer = {
-  type: 'offer',
-  sdp: sdp
-};
+  get rtpAudioParameters() {
+    this.genAudioSsrc();
+    return this._rtpAudioParameters;
+  }
 
-module.exports = sdpconf = {
-    sdp,
-    sdp_rtp,
-    sdp_offer,
-    rtpAudioParameters, // need custom ssrc, cname, but the cname must the same with rtpVideoParameters.
-    rtpVideoParameters  // need custom ssrc, cname, but the cname must the same with rtpVideoParameters.
+  get rtpVideoParameters() {
+    this.genVideoSsrc();
+    return this._rtpVideoParameters;
+  }
+
+  get sdp() {
+    this.genVideoSsrc();
+    return this._sdp;
+  }
+
+  get sdp_offer() {
+    this.genVideoSsrc();
+    let offer = {
+      type: 'offer',
+      sdp: this._sdp
+    }
+
+    return offer;
+  }
+
+  get sdp_rtp() {
+    this.genVideoSsrc();
+    return this._sdp_rtp;
+  }
 }
+
+module.exports = sdpconf;

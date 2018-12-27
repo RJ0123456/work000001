@@ -45,11 +45,13 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 var logger = new _Logger.default('NodeDevice');
 
-var sdp = require('./sdpconf').sdp;
-var sdp_rtp = require('./sdpconf').sdp_rtp;
-var rtpAudioParameters = require('./sdpconf').rtpAudioParameters;
-var rtpVideoParameters = require('./sdpconf').rtpVideoParameters;
-var sdp_offer = require('./sdpconf').sdp_offer;
+const sdpconf = require('./sdpconf');
+const sdpconf_obj = new sdpconf();
+
+// var sdp_rtp = require('./sdpconf').sdp_rtp;
+// var rtpAudioParameters = require('./sdpconf').rtpAudioParameters;
+// var rtpVideoParameters = require('./sdpconf').rtpVideoParameters;
+// var sdp_offer = require('./sdpconf').sdp_offer;
 
 var Handler =
   /*#__PURE__*/
@@ -121,7 +123,7 @@ var SendHandler =
         this._trackIds.add(track.id);
   
         return Promise.resolve().then(function () {
-          return sdp_offer;
+          return sdpconf_obj.sdp_offer;
         }).then(function (offer) {
           // If simulcast is set, mangle the offer.
           if (producer.simulcast) {
@@ -146,7 +148,7 @@ var SendHandler =
         }).then(function () {
           if (!_this3._transportReady) return _this3._setupTransport();
         }).then(function () {
-          localSdpObj = _sdpTransform.default.parse(sdp_offer.sdp);
+          localSdpObj = _sdpTransform.default.parse(sdpconf_obj.sdp_offer.sdp);
   
           var remoteSdp = _this3._remoteSdp.createAnswerSdp(localSdpObj);
   
@@ -163,10 +165,10 @@ var SendHandler =
           });
           //return rtpParameters;
           if(producer.kind === 'audio') {
-            return JSON.parse(rtpAudioParameters);
+            return JSON.parse(sdpconf_obj.rtpAudioParameters);
           }
           if(producer.kind === 'video') {
-            return JSON.parse(rtpVideoParameters);
+            return JSON.parse(sdpconf_obj.rtpVideoParameters);
           }
         }).catch(function (error) {
           // Panic here. Try to undo things.
@@ -202,7 +204,7 @@ var SendHandler =
           // Get our local DTLS parameters.
           var transportLocalParameters = {};
 
-          var sdpObj = _sdpTransform.default.parse(sdp);
+          var sdpObj = _sdpTransform.default.parse(sdpconf_obj.sdp);
 
           var dtlsParameters = sdpCommonUtils.extractDtlsParameters(sdpObj); // Let's decide that we'll be DTLS server (because we can).
 
@@ -323,7 +325,7 @@ var NodeDevice =
       key: "getNativeRtpCapabilities",
       value: function getNativeRtpCapabilities() {
         logger.debug('getNativeRtpCapabilities()');
-        var sdpObj = _sdpTransform.default.parse(sdp);
+        var sdpObj = _sdpTransform.default.parse(sdpconf_obj.sdp);
         var nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities(sdpObj);
         return nativeRtpCapabilities;
       }
