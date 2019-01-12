@@ -1,0 +1,46 @@
+https://cmsdk.com/node-js/convert-raw-rtp-packets-from-mediasoup-to-frames.html
+
+https://github.com/versatica/mediasoup/issues/227
+
+==================
+1: (client)addProducer --> plainRtpParameters --> (server)createTransport(plainRtpParameters) ---> 
+(https://github.com/versatica/mediasoup-client/blob/v3/doc/ffmpeg.md)
+specification SDP like:
+{
+	v=0
+	o=- 0 0 IN IP4 127.0.0.1
+	s=No Name
+	c=IN IP4 1.2.3.4
+	t=0 0
+	a=tool:libavformat 58.20.100
+	m=audio 1234 RTP/AVP 111
+	b=AS:128
+	a=rtpmap:111 opus/48000/2
+	a=fmtp:111 sprop-stereo=1
+}
+
+2: send RTP stream
+ffmpeg \
+  -re -f mp3 -i audio.mp3 -acodec libopus -ab 128k -ac 2 -ar 48000 \
+  -ssrc 666 -payload_type 111 \
+  -f rtp "rtp://1.2.3.4:1234?rtcpport=1234&localrtpport=10000&localrtcpport=10001"
+
+
+ffmpeg  -re -f mp3 -i t2.mp3 -acodec libopus -ab 128k -ac 2 -ar 48000  -ssrc 12345678 -payload_type 111  -f rtp "rtp://114.116.84.241:45195"
+
+ffmpeg  -re -f mp4 -i t1.mp4 -acodec libx264 -acodec libopus -ssrc 87654321 -payload_type 100  -f rtp "rtp://114.116.84.241:49172"
+
+ffmpeg  -re -f mp4 -i t2.mp4 -vcodec libx264 -ssrc 87654321 -payload_type 100  -f rtp "rtp://114.116.84.241:46304"
+
+ffmpeg  -re -i t1.h264 -vcodec copy -ssrc 87654321 -payload_type 100  -f rtp "rtp://114.116.84.241:48517"
+
+=====================================
+  Do you mean anyone using mediasoup can take streams out , do some job ,and then put it back?? or , insert/replace streams into "server side peer" ?
+
+It's not mediasoup the entity who will do such as "job". The picture would be as follows:
+
+Browser A sends video to mediasoup.
+mediasoup forwards that video stream to another node via sig+RTP (that node is a consumer).
+Such a node may run in same or different host.
+Such a node processes the video, converts it, etc, and sends it back to mediasoup via a new producer.
+mediasoup forwards that new video to browser B and browser C.
